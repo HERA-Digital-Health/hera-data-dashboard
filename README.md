@@ -5,6 +5,10 @@
 1. `yarn install`
 2. `yarn dev`
 
+## Stack
+
+To do
+
 ## How do I add a new dashboard?
 
 To do
@@ -13,6 +17,6 @@ To do
 
 To do
 
-## Architecture
+## Code Architecture
 
 To do
