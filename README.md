@@ -1,6 +1,6 @@
 # HERA Data Dashboard
 
-# Local development
+## Local development
 
 1. `yarn install`
 2. `yarn dev`
@@ -13,6 +13,6 @@ To do
 
 To do
 
-# Architecture
+## Architecture
 
 To do
