@@ -47,6 +47,7 @@ The endpoint you list will be appended after the `/data_dashboard/` path.
 - [ ] Deploy to production and add documentation to Readme on how to deploy
 - [ ] In DashboardViewer mode, show an error if a visualization tries to load without a valid QuerySpec
 - [ ] Check for dashboard slug uniqueness before saving
+- [ ] Redirect users to `/login` if they are not authenticated
 
 ## Stack
 
@@ -60,4 +61,52 @@ The endpoint you list will be appended after the `/data_dashboard/` path.
 
 ## Code Architecture
 
-To do
+The app is structured as a single-page app with three main views:
+
+1. Login view
+2. Dashboard Builder view
+3. Dashboard Viewer view
+
+### Login view
+
+**Directory**: `/src/components/LoginView`
+
+Handles authentiation by generating a CSRF token with the Django backend API and using that for subsequent calls. If authentication is successful, the user will be redirected to the main app.
+
+### Dashboard Builder view
+
+**Directory**: `/src/components/DashboardBuilderView`
+
+This is where you can build new visualizations, explore your data, arrange them into a dashboard, and export a dashboard JSON.
+
+### Dashboard Viewer view
+
+**Directory**: `/src/components/DashboardViewerView`
+
+This is where you can view a pre-built dashboard. Pre-built dashboards are representd by a `DashboardSpec` model which is stored in a JSON blob. Currently, dashboard JSONs are stored in `src/dashboards` though eventually they should be stored in a database to prevent needing to bundle them with the app.
+
+### Overall directory structure
+
+```
+.
+└─ src
+    ├── main.tsx # App entry point
+    ├── assets
+    │   └── Publicly reachable assets
+    ├── components
+    │   ├── DashboardBuilderView
+    │   ├── DashboardViewer
+    │   ├── LoginView
+    │   └── ui
+    │       └── Custom-built UI components and visualizations
+    ├── config
+    │   └── Configuration files
+    ├── dashboards
+    │   └── Pre-built dashboards to load into the app
+    ├── hooks
+    │   └── Commonly used hooks
+    ├── models
+    │   └── Common data models and types used throughout the app
+    └── utils
+        └── Common utility functions
+```
