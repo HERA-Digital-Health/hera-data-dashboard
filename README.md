@@ -1,5 +1,7 @@
 # HERA Data Dashboard
 
+![Screenshot](screenshot.png)
+
 ## Local development
 
 This is a Vite SPA so development is really easy. All you need to do is:
