@@ -1,22 +1,24 @@
+import * as React from 'react';
 import { Card } from '@tremor/react';
 import { VizSpec } from '../../../models/VizSpec';
 import { Visualization } from '../../ui/Visualization';
 import { useHeraQuery } from '../../../hooks/useHeraQuery';
 
 type Props = {
-  vizSpec: VizSpec;
+  defaultVizSpec: VizSpec;
 };
 
-export function VisualizationViewer({ vizSpec }: Props): JSX.Element {
+export function VisualizationViewer({ defaultVizSpec }: Props): JSX.Element {
+  const [vizSpec, setVizSpec] = React.useState(defaultVizSpec);
   const { data } = useHeraQuery(vizSpec.querySpec);
 
-  // TODO: implement onVizSpecChange
   return (
-    <Card>
+    <Card className="h-fit">
       <Visualization
+        editorMode={false}
         data={data}
         vizSpec={vizSpec}
-        onVizSpecChange={() => undefined}
+        onVizSpecChange={setVizSpec}
       />
     </Card>
   );

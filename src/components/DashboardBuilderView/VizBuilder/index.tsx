@@ -91,7 +91,7 @@ export function VizBuilder({
   };
 
   return (
-    <Card className="relative">
+    <Card className="relative" style={{ maxWidth: 1000 }}>
       <div className="absolute right-0 top-0">
         <Button
           variant="light"
@@ -103,7 +103,7 @@ export function VizBuilder({
         </Button>
       </div>
       <form className="space-y-4">
-        <div className="flex flex-col">
+        <div className="flex space-x-3">
           <LabelWrapper label="Indicator">
             <Select
               onValueChange={onIndicatorChange}
@@ -144,6 +144,7 @@ export function VizBuilder({
       </form>
       {isFetching ? <p>Fetching...</p> : null}
       <Visualization
+        editorMode
         className="pt-4"
         vizSpec={vizSpec}
         data={data}

@@ -1,1 +1,0 @@
-{"title":"Vaccine test","slug":"vaccine-test","visualizations":[{"title":"Vaccines","id":"d72dd5f3-96af-4480-8508-e5784fd9bf7e","querySpec":{"indicator":{"name":"Vaccinations","endpoint":"vaccinations"},"dateRange":{"from":"2024-01-01","to":"2024-04-30","selectValue":"y"}},"vizType":"BAR_CHART","xAxisField":"vaccine_name","seriesFields":["yes","no_response","no"]}]}

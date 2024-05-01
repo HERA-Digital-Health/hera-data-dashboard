@@ -35,7 +35,9 @@ export function DashboardViewer(): JSX.Element {
         style={{ maxWidth: 1400 }}
       >
         {dashboard.visualizations.map((vizSpec) => {
-          return <VisualizationViewer key={vizSpec.id} vizSpec={vizSpec} />;
+          return (
+            <VisualizationViewer key={vizSpec.id} defaultVizSpec={vizSpec} />
+          );
         })}
       </div>
     </div>

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as R from 'remeda';
 import {
+  Button,
   MultiSelect,
   MultiSelectItem,
   Select,
@@ -8,13 +9,16 @@ import {
   LineChart,
   BarChart,
   Switch,
+  Icon,
 } from '@tremor/react';
 import { HeraVizData } from '../../../models/common';
 import { VizSpec } from '../../../models/VizSpec';
 import { TitleEditor } from '../TitleEditor';
 import { LabelWrapper } from '../LabelWrapper';
+import { RiArrowUpSLine, RiArrowDownSLine } from '@remixicon/react';
 
 type Props = {
+  editorMode: boolean;
   data: HeraVizData | undefined;
   vizSpec: VizSpec;
   className?: string;
@@ -24,11 +28,14 @@ type Props = {
 const VISUALIZATION_HEIGHT = 400;
 
 export function Visualization({
+  editorMode,
   data,
   vizSpec,
   className,
   onVizSpecChange,
 }: Props): JSX.Element {
+  const [showVizControls, setShowVizControls] = React.useState(editorMode);
+
   // get the first data object which we assume is enough to determine
   // what fields are used in this data frame
   const firstDataObj = React.useMemo(() => {
@@ -161,8 +168,8 @@ export function Visualization({
     );
   };
 
-  const renderLineChartControls = () => {
-    return <>Line chart</>;
+  const renderDateGroupByControl = () => {
+    return <>Date group by</>;
   };
 
   const renderVisualizationControls = () => {
@@ -202,7 +209,7 @@ export function Visualization({
           </LabelWrapper>
 
           {vizSpec.vizType === 'BAR_CHART' ? renderBarChartControls() : null}
-          {vizSpec.vizType === 'LINE_CHART' ? renderLineChartControls() : null}
+          {vizSpec.xAxisField === 'date' ? renderDateGroupByControl() : null}
         </div>
       );
     }
@@ -213,13 +220,40 @@ export function Visualization({
     <div className={className}>
       <div className="flex justify-center">
         <TitleEditor
+          allowEdit={editorMode}
           titleSize="h2"
           onSaveTitle={onTitleChange}
           title={vizSpec.title}
         />
       </div>
       {renderVisualization()}
-      {renderVisualizationControls()}
+      {vizSpec.vizType !== undefined ? (
+        <>
+          <Button
+            variant="light"
+            color="slate"
+            className="pb-2 pt-3 text-sm font-medium"
+            onClick={() => {
+              setShowVizControls((prev) => !prev);
+            }}
+          >
+            <div className="flex items-center">
+              Settings
+              <span style={{ marginLeft: -4 }}>
+                {showVizControls ? (
+                  <Icon icon={RiArrowUpSLine} size="sm" color="slate" />
+                ) : (
+                  <Icon icon={RiArrowDownSLine} size="sm" color="slate" />
+                )}
+              </span>
+            </div>
+          </Button>
+
+          {showVizControls ? (
+            <div className="pl-3">{renderVisualizationControls()}</div>
+          ) : null}
+        </>
+      ) : null}
     </div>
   );
 }

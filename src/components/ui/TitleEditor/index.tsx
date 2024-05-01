@@ -7,12 +7,14 @@ type Props = {
   title: string;
   onSaveTitle?: (newTitle: string) => void;
   titleSize?: 'h1' | 'h2';
+  allowEdit?: boolean;
 };
 
 export function TitleEditor({
   title,
   onSaveTitle,
   titleSize = 'h1',
+  allowEdit = true,
 }: Props): JSX.Element {
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [tempTitle, setTempTitle] = React.useState(title);
@@ -62,18 +64,20 @@ export function TitleEditor({
       ) : (
         <>
           <Heading size={titleSize}>{title}</Heading>
-          <Button
-            className="ml-2"
-            variant="light"
-            onClick={() => setIsEditingTitle(true)}
-          >
-            <Icon
-              icon={RiPencilFill}
-              variant="simple"
-              size="sm"
-              tooltip="Edit"
-            />
-          </Button>
+          {allowEdit ? (
+            <Button
+              className="ml-2"
+              variant="light"
+              onClick={() => setIsEditingTitle(true)}
+            >
+              <Icon
+                icon={RiPencilFill}
+                variant="simple"
+                size="sm"
+                tooltip="Edit"
+              />
+            </Button>
+          ) : null}
         </>
       )}
     </div>

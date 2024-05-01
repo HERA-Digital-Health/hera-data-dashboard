@@ -87,7 +87,7 @@ export function DashboardBuilderView(): JSX.Element {
   };
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col pb-16">
       <div className="flex items-center space-x-4">
         <div className="flex-1">
           <TitleEditor onSaveTitle={onDashTitleChange} title={dashSpec.title} />
@@ -101,7 +101,7 @@ export function DashboardBuilderView(): JSX.Element {
           </Button>
         </div>
       </div>
-      <div className="mt-6 grid grid-cols-2 flex-col items-center justify-center gap-4">
+      <div className="mt-6 flex flex-col items-center justify-center gap-4">
         {dashSpec.visualizations.map((vizSpec) => {
           return (
             <VizBuilder
