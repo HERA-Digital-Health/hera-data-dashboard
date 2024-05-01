@@ -116,3 +116,11 @@ This is where you can view a pre-built dashboard. Pre-built dashboards are repre
     └── utils
         └── Common utility functions
 ```
+
+### VizSpec and DashboardSpec
+
+These are the two most important models (i.e. types) of the app.
+
+`VizSpec` is the model that represents how a visualization is both queried and rendered. Inside `VizSpec` there is a `querySpec` nested model. This holds the specification of how we should query the backend API. Everything else that isn't `querySpec` refers to how the visualization should be rendered on the frontend (for example, which visualization type we're choosing or which field is our x-axis).
+
+`DashboardSpec` is the model that represents how a dashboard is configured. It consists mostly of a title, a slug (i.e. the URL-friendly title that the dashboard will be accessible at), and a list of visualizations (represented as an array of `VizSpec` models).
