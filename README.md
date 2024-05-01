@@ -7,6 +7,22 @@ This is a Vite SPA so development is really easy. All you need to do is:
 1. `yarn install`
 2. `yarn dev`
 
+## Deploying to production
+
+1. Run `yarn build` locally
+2. Tar the dist directory: `tar -czvf dist.tar.gz dist/`
+3. scp dist.tar.gz to the EC2 instance
+
+Now ssh into the EC2 instance
+
+1. Untar into `/srv/data-dashboard`
+2. Run `pm2 list` and check if `vite-app` is already there
+3. Untar the
+4. Run `pm2 list` and check if `vite-app` is already there.
+5. If it is, just run `pm2 restart vite-app`. If it is not, run `pm2 serve /srv/data-dashboard 3000 --spa --name vite-app` to start the service.
+
+The dashboard should be running and accessible at the EC2 instance URL!
+
 ## How do I add a new dashboard?
 
 1. Go to the Dashboard Builder
