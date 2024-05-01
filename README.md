@@ -29,8 +29,7 @@ The dashboard should be running and accessible at the EC2 instance URL!
 2. Build your dashboard
 3. Click on "Export Dashboard"
 4. Save the JSON file in `src/dashboards` (name the JSON file however you'd like)
-5. Add the JSON filename to `src/config/Constants.ts`
-6. Rebuild and redeploy the app
+5. Import the JSON in `src/config/Dashboards.ts` and add it to the `DASHBOARDS` array in that file
 
 ## How do I add new indicators?
 
