@@ -13,7 +13,7 @@ This is a Vite SPA so development is really easy. All you need to do is:
 2. Tar the dist directory: `tar -czvf dist.tar.gz dist/`
 3. scp dist.tar.gz to the EC2 instance
 
-Now ssh into the EC2 instance
+Now ssh into the EC2 instance as a root user
 
 1. Untar into `/srv/data-dashboard`
 2. Run `pm2 list` and check if `vite-app` is already there
