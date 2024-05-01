@@ -23,6 +23,9 @@ export type VizSpec = {
   xAxisField?: string;
   seriesFields?: readonly string[];
   querySpec: QuerySpec;
+
+  // bar chart controls
+  barChartStack?: boolean;
 };
 
 export function makeDefaultVizSpec(): VizSpec {

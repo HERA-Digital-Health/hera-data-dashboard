@@ -7,6 +7,7 @@ import {
   SelectItem,
   LineChart,
   BarChart,
+  Switch,
 } from '@tremor/react';
 import { HeraVizData } from '../../../models/common';
 import { VizSpec } from '../../../models/VizSpec';
@@ -19,6 +20,8 @@ type Props = {
   className?: string;
   onVizSpecChange: (newVizSpec: VizSpec) => void;
 };
+
+const VISUALIZATION_HEIGHT = 400;
 
 export function Visualization({
   data,
@@ -90,9 +93,11 @@ export function Visualization({
 
           return (
             <BarChart
+              stack={vizSpec.barChartStack ?? false}
               index={vizSpec.xAxisField ?? ''}
               categories={vizSpec.seriesFields as string[]}
-              className="h-72 w-full"
+              style={{ height: VISUALIZATION_HEIGHT }}
+              className="w-full"
               data={data}
               yAxisWidth={30}
             />
@@ -118,8 +123,9 @@ export function Visualization({
 
           return (
             <LineChart
-              className="h-72 w-full"
+              className="w-full"
               data={data}
+              style={{ height: VISUALIZATION_HEIGHT }}
               categories={vizSpec.seriesFields as string[]}
               index={vizSpec.xAxisField ?? ''}
               yAxisWidth={30}
@@ -137,6 +143,26 @@ export function Visualization({
       );
     }
     return <p className="pt-4 text-center">There is no data to show.</p>;
+  };
+
+  const renderBarChartControls = () => {
+    return (
+      <LabelWrapper label="Stacked">
+        <Switch
+          checked={vizSpec.barChartStack ?? false}
+          onChange={(newVal: boolean) =>
+            onVizSpecChange({
+              ...vizSpec,
+              barChartStack: newVal,
+            })
+          }
+        />
+      </LabelWrapper>
+    );
+  };
+
+  const renderLineChartControls = () => {
+    return <>Line chart</>;
   };
 
   const renderVisualizationControls = () => {
@@ -174,6 +200,9 @@ export function Visualization({
               })}
             </MultiSelect>
           </LabelWrapper>
+
+          {vizSpec.vizType === 'BAR_CHART' ? renderBarChartControls() : null}
+          {vizSpec.vizType === 'LINE_CHART' ? renderLineChartControls() : null}
         </div>
       );
     }
