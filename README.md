@@ -9,7 +9,12 @@ This is a Vite SPA so development is really easy. All you need to do is:
 
 ## How do I add a new dashboard?
 
-To do
+1. Go to the Dashboard Builder
+2. Build your dashboard
+3. Click on "Export Dashboard"
+4. Save the JSON file in `src/dashboards` (name the JSON file however you'd like)
+5. Add the JSON filename to `src/config/Constants.ts`
+6. Rebuild and redeploy the app
 
 ## How do I add new indicators?
 
