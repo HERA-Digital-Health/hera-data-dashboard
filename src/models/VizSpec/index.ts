@@ -26,6 +26,9 @@ export type VizSpec = {
 
   // bar chart controls
   barChartStack?: boolean;
+
+  // date group by controls
+  dateGroupBy?: 'day' | 'week' | 'month' | 'year';
 };
 
 export function makeDefaultVizSpec(): VizSpec {

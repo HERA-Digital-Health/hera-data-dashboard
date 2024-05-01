@@ -16,6 +16,7 @@ import { VizSpec } from '../../../models/VizSpec';
 import { TitleEditor } from '../TitleEditor';
 import { LabelWrapper } from '../LabelWrapper';
 import { RiArrowUpSLine, RiArrowDownSLine } from '@remixicon/react';
+import { stringToDateTime } from '../../../utils/dateUtil';
 
 type Props = {
   editorMode: boolean;
@@ -26,6 +27,78 @@ type Props = {
 };
 
 const VISUALIZATION_HEIGHT = 400;
+
+function bucketByDateGranularity(
+  data: HeraVizData,
+  granularity: 'day' | 'week' | 'month' | 'year',
+) {
+  if (data.length === 0) {
+    return [];
+  }
+
+  // bucket into arrays per date granularity
+  // (e.g. an array of data objects per month)
+  const bucketedObjectsByDate = R.groupBy(data, (dataObj) => {
+    if ('date' in dataObj && dataObj.date) {
+      const date = dataObj.date;
+
+      switch (granularity) {
+        case 'day':
+          return stringToDateTime(date).toFormat('yyyy-MM-dd');
+        case 'week':
+          return stringToDateTime(date).startOf('week').toFormat('yyyy-MM-dd');
+        case 'month':
+          return stringToDateTime(date).startOf('month').toFormat('yyyy-MM');
+        case 'year':
+          return stringToDateTime(date).startOf('year').toFormat('yyyy');
+      }
+    }
+    return undefined;
+  });
+
+  // now sum up the arrays
+  const aggregatedBuckets = R.mapValues(
+    bucketedObjectsByDate,
+    (dataObjects) => {
+      if (dataObjects.length === 0) {
+        return [];
+      }
+
+      // exclude 'date' from the keys
+      const keys = Object.keys(dataObjects[0]).filter((key) => key !== 'date');
+      const aggregatedDataObj = R.mapToObj(keys, (key) => [
+        key,
+        undefined as undefined | number,
+      ]);
+
+      dataObjects.forEach((dataObj) => {
+        keys.forEach((key) => {
+          if (typeof dataObj[key] === 'number') {
+            const newVal = dataObj[key] as number;
+            const currVal = aggregatedDataObj[key];
+            if (currVal === undefined) {
+              aggregatedDataObj[key] = newVal;
+            } else {
+              aggregatedDataObj[key] = newVal + currVal;
+            }
+          }
+        });
+      });
+
+      return aggregatedDataObj;
+    },
+  );
+
+  // and now convert it back to a HeraVizData array
+  return R.pipe(
+    aggregatedBuckets,
+    R.entries,
+    R.map(([date, dataObj]) => {
+      return { ...dataObj, date };
+    }),
+    R.sortBy((obj) => obj.date),
+  );
+}
 
 export function Visualization({
   editorMode,
@@ -65,6 +138,7 @@ export function Visualization({
     onVizSpecChange({
       ...vizSpec,
       xAxisField: newXAxisField,
+      dateGroupBy: newXAxisField === 'date' ? 'day' : undefined,
     });
   };
 
@@ -75,8 +149,15 @@ export function Visualization({
     });
   };
 
+  const processedData: HeraVizData | undefined = React.useMemo(() => {
+    if (data && vizSpec.dateGroupBy) {
+      return bucketByDateGranularity(data, vizSpec.dateGroupBy);
+    }
+    return data;
+  }, [data, vizSpec.dateGroupBy]);
+
   const renderVisualization = () => {
-    if (data && vizSpec.vizType) {
+    if (processedData && vizSpec.vizType) {
       switch (vizSpec.vizType) {
         case 'BAR_CHART':
           if (vizSpec.xAxisField === undefined) {
@@ -105,7 +186,7 @@ export function Visualization({
               categories={vizSpec.seriesFields as string[]}
               style={{ height: VISUALIZATION_HEIGHT }}
               className="w-full"
-              data={data}
+              data={processedData}
               yAxisWidth={30}
             />
           );
@@ -131,7 +212,7 @@ export function Visualization({
           return (
             <LineChart
               className="w-full"
-              data={data}
+              data={processedData}
               style={{ height: VISUALIZATION_HEIGHT }}
               categories={vizSpec.seriesFields as string[]}
               index={vizSpec.xAxisField ?? ''}
@@ -144,7 +225,7 @@ export function Visualization({
       }
     }
 
-    if (data && !vizSpec.vizType) {
+    if (processedData && !vizSpec.vizType) {
       return (
         <p className="pt-4 text-center">Please select a visualization type.</p>
       );
@@ -169,11 +250,29 @@ export function Visualization({
   };
 
   const renderDateGroupByControl = () => {
-    return <>Date group by</>;
+    return (
+      <LabelWrapper label="Group date by">
+        <Select
+          onValueChange={(val: string) => {
+            onVizSpecChange({
+              ...vizSpec,
+              dateGroupBy: val as VizSpec['dateGroupBy'],
+            });
+          }}
+          value={vizSpec.dateGroupBy}
+          placeholder="Group date by..."
+        >
+          <SelectItem value="day">Day</SelectItem>
+          <SelectItem value="week">Week</SelectItem>
+          <SelectItem value="month">Month</SelectItem>
+          <SelectItem value="year">Year</SelectItem>
+        </Select>
+      </LabelWrapper>
+    );
   };
 
   const renderVisualizationControls = () => {
-    if (data && vizSpec.vizType) {
+    if (processedData && vizSpec.vizType) {
       return (
         <div className="flex flex-col space-y-2">
           <LabelWrapper label="X Axis">

@@ -13,9 +13,16 @@ export function formatDate(
   return dateTime.toFormat(format);
 }
 
+export function stringToDateTime(
+  dateString: string,
+  format: string = STANDARD_DATE_FORMAT,
+): DateTime {
+  return DateTime.fromFormat(dateString, format);
+}
+
 export function stringToJSDate(
   dateString: string,
   format: string = STANDARD_DATE_FORMAT,
 ): Date {
-  return DateTime.fromFormat(dateString, format).toJSDate();
+  return stringToDateTime(dateString, format).toJSDate();
 }

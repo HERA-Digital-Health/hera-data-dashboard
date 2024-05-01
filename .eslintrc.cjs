@@ -75,7 +75,7 @@ module.exports = {
       {
         labelComponents: ['LabelWrapper'],
         labelAttributes: ['label'],
-        controlComponents: ['DateRangePicker', 'TextInput', 'Switch'],
+        controlComponents: ['Select', 'DateRangePicker', 'TextInput', 'Switch'],
       },
     ],
     'no-unused-vars': 'off',
