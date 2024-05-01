@@ -2,6 +2,8 @@
 
 ## Local development
 
+This is a Vite SPA so development is really easy. All you need to do is:
+
 1. `yarn install`
 2. `yarn dev`
 
