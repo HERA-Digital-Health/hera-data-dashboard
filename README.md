@@ -7,6 +7,14 @@ This is a Vite SPA so development is really easy. All you need to do is:
 1. `yarn install`
 2. `yarn dev`
 
+## How do I add a new dashboard?
+
+To do
+
+## How do I add new indicators?
+
+To do
+
 ## To do
 
 - [ ] Store and load dashboards in a database instead of hardcoding JSONs
@@ -17,14 +25,6 @@ This is a Vite SPA so development is really easy. All you need to do is:
 - [ ] Check for dashboard slug uniqueness before saving
 
 ## Stack
-
-To do
-
-## How do I add a new dashboard?
-
-To do
-
-## How do I add new indicators?
 
 To do
 
