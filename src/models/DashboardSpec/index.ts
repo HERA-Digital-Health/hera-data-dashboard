@@ -1,6 +1,12 @@
 import { VizSpec, makeDefaultVizSpec, loadVizSpecFromJSON } from '../VizSpec';
 import { JSONCompatible } from '../../utils/jsonUtil';
 
+/**
+ * `DashboardSpec` represents how a dashboard is configured. It consists
+ * mostly of a title, a slug (i.e. the URL-friendly title that the dashboard
+ * will be accessible at), and a list of visualizations (represented as an
+ * array of `VizSpec` models).
+ */
 export type DashboardSpec = {
   title: string;
   slug: string;

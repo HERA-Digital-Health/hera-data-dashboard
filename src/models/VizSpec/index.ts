@@ -6,7 +6,8 @@ import { JSONCompatible } from '../../utils/jsonUtil';
 import { stringToJSDate } from '../../utils/dateUtil';
 
 /**
- * The metadata to describe a Hera query
+ * The metadata to describe a Hera query. This represents how we will query the
+ * backend API.
  */
 export type QuerySpec = {
   indicator?: Indicator;
@@ -14,7 +15,12 @@ export type QuerySpec = {
 };
 
 /**
- * The metadata to describe a visualization
+ * `VizSpec` represents how a visualization is both queried and rendered.
+ * Inside `VizSpec` there is a `querySpec` nested model. This holds the
+ * specification of how we should query the backend API. Everything else that
+ * isn't `querySpec` refers to how the visualization should be rendered on the
+ * frontend (for example, which visualization type we're choosing or which
+ * field is our x-axis).
  */
 export type VizSpec = {
   title: string;
