@@ -2,7 +2,6 @@ import * as React from 'react';
 import { clsx } from 'clsx';
 import { Link, useMatch } from 'react-router-dom';
 import { useDashboards } from '../../../hooks/useDashboards';
-import { Heading } from '../Heading';
 import { Divider } from '@tremor/react';
 
 function NavButton({
