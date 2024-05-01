@@ -48,6 +48,18 @@ export function VizBuilder({
           ? 'date'
           : vizSpec.xAxisField,
 
+      // if there is loaded data and there is a 'date' field, then
+      // proactively set the group by to be by 'day' if it is not
+      // already set
+      dateGroupBy:
+        data &&
+        data.length > 0 &&
+        data[0] &&
+        'date' in data[0] &&
+        vizSpec.dateGroupBy === undefined
+          ? 'day'
+          : vizSpec.dateGroupBy,
+
       // if there is loaded data and we haven't already chosen the series
       // fields to visualize, then select all of them
       seriesFields:
