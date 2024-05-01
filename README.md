@@ -18,7 +18,11 @@ This is a Vite SPA so development is really easy. All you need to do is:
 
 ## How do I add new indicators?
 
-To do
+Add any new indicator configurations to `src/config/Indicators.ts`
+
+A new indicator requires a name and the endpoint it will hit at the Django backend API: `https://herav2-web-service.production-turkey.herav2.heradigitalhealth.com/data_dashboard/`
+
+The endpoint you list will be appended after the `/data_dashboard/` path.
 
 ## To do
 
