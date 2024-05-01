@@ -12,3 +12,10 @@ export function formatDate(
   const dateTime = DateTime.fromJSDate(date);
   return dateTime.toFormat(format);
 }
+
+export function stringToJSDate(
+  dateString: string,
+  format: string = STANDARD_DATE_FORMAT,
+): Date {
+  return DateTime.fromFormat(dateString, format).toJSDate();
+}

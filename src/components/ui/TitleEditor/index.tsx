@@ -5,17 +5,22 @@ import { Heading } from '../Heading';
 
 type Props = {
   title: string;
-  onSaveTitle: (newTitle: string) => void;
+  onSaveTitle?: (newTitle: string) => void;
+  titleSize?: 'h1' | 'h2';
 };
 
-export function TitleEditor({ title, onSaveTitle }: Props): JSX.Element {
+export function TitleEditor({
+  title,
+  onSaveTitle,
+  titleSize = 'h1',
+}: Props): JSX.Element {
   const [isEditingTitle, setIsEditingTitle] = React.useState(false);
   const [tempTitle, setTempTitle] = React.useState(title);
 
   return (
-    <div className="flex">
+    <div className="flex items-center">
       {isEditingTitle ? (
-        <>
+        <form className="flex" onSubmit={(event) => event.preventDefault()}>
           <TextInput
             className="mr-2 w-fit"
             placeholder="Set title..."
@@ -24,9 +29,12 @@ export function TitleEditor({ title, onSaveTitle }: Props): JSX.Element {
           />
           <Button
             variant="light"
+            type="submit"
             onClick={() => {
               setIsEditingTitle(false);
-              onSaveTitle(tempTitle);
+              if (onSaveTitle) {
+                onSaveTitle(tempTitle);
+              }
             }}
           >
             <Icon
@@ -50,10 +58,10 @@ export function TitleEditor({ title, onSaveTitle }: Props): JSX.Element {
               tooltip="Cancel"
             />
           </Button>
-        </>
+        </form>
       ) : (
         <>
-          <Heading size="h1">{title}</Heading>
+          <Heading size={titleSize}>{title}</Heading>
           <Button
             className="ml-2"
             variant="light"

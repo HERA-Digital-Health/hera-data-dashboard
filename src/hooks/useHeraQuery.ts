@@ -1,27 +1,20 @@
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { API_BASE_URL } from '../config/Constants';
-import { type HeraVizData, type Indicator } from '../models/common';
-import { DateRangePickerValue } from '@tremor/react';
+import { type HeraVizData } from '../models/common';
 import { formatDate } from '../utils/dateUtil';
-
-type HeraQueryParams = {
-  indicator: Indicator;
-  dateRange: DateRangePickerValue;
-};
+import { QuerySpec } from '../models/VizSpec';
 
 type HeraQueryHTTPResponse = {
   [key: string]: unknown;
   data: HeraVizData;
 };
 
-function isQueryValid(queryParams: Partial<HeraQueryParams>): boolean {
+function isQueryValid(queryParams: QuerySpec): boolean {
   const { indicator, dateRange } = queryParams;
   return !!indicator && !!dateRange?.from && !!dateRange?.to;
 }
 
-function makeQueryKey(
-  queryParams: Partial<HeraQueryParams>,
-): Array<string | undefined> {
+function makeQueryKey(queryParams: QuerySpec): Array<string | undefined> {
   const { indicator, dateRange } = queryParams;
   const dateFromStr = dateRange?.from ? formatDate(dateRange?.from) : undefined;
   const dateToStr = dateRange?.to ? formatDate(dateRange?.to) : undefined;
@@ -29,7 +22,7 @@ function makeQueryKey(
 }
 
 export function useHeraQuery(
-  queryParams: Partial<HeraQueryParams>,
+  queryParams: QuerySpec,
 ): UseQueryResult<HeraVizData> {
   const { indicator, dateRange } = queryParams;
 

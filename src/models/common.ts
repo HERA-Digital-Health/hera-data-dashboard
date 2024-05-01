@@ -11,18 +11,10 @@ export type VizTypeMeta = {
   displayName: string;
 };
 
-export type HeraVizData = Array<
-  {
-    [key: string]: string | number;
-  } & {
-    date?: string; // dates must be in YYYY-MM-DD format
-  }
->;
-
-/**
- * The metadata to describe a visualization
- */
-export type VizSpec = {
-  title: string;
-  id: string;
+export type HeraDataObject = {
+  [key: string]: string | number;
+} & {
+  date?: string; // dates must be in YYYY-MM-DD format
 };
+
+export type HeraVizData = HeraDataObject[];

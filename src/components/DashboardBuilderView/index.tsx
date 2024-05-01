@@ -54,7 +54,7 @@ export function DashboardBuilderView(): JSX.Element {
     });
   };
 
-  const onVizSpecUpdate = (updatedViz: VizSpec) => {
+  const onVizSpecChange = (updatedViz: VizSpec) => {
     setDashSpec((prevDashSpec) => {
       return {
         ...prevDashSpec,
@@ -86,11 +86,6 @@ export function DashboardBuilderView(): JSX.Element {
     URL.revokeObjectURL(url); // clean up
   };
 
-  /*
-   *
-        <p>2. Create repo</p>
-        <p>6. Load dashboards</p>
-   */
   return (
     <div className="flex w-full flex-col">
       <div className="flex items-center space-x-4">
@@ -106,13 +101,13 @@ export function DashboardBuilderView(): JSX.Element {
           </Button>
         </div>
       </div>
-      <div className="mt-6 flex flex-col items-center justify-center space-y-4">
+      <div className="mt-6 grid grid-cols-2 flex-col items-center justify-center gap-4">
         {dashSpec.visualizations.map((vizSpec) => {
           return (
             <VizBuilder
               key={vizSpec.id}
               vizSpec={vizSpec}
-              onVizSpecUpdate={onVizSpecUpdate}
+              onVizSpecChange={onVizSpecChange}
               onRemoveVisualization={onRemoveViz}
             />
           );

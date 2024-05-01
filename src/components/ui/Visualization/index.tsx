@@ -1,44 +1,97 @@
 import * as React from 'react';
 import * as R from 'remeda';
-import { Select, SelectItem, LineChart, BarChart } from '@tremor/react';
-import { HeraVizData, VizSpec, VizType } from '../../../models/common';
+import {
+  MultiSelect,
+  MultiSelectItem,
+  Select,
+  SelectItem,
+  LineChart,
+  BarChart,
+} from '@tremor/react';
+import { HeraVizData } from '../../../models/common';
+import { VizSpec } from '../../../models/VizSpec';
 import { TitleEditor } from '../TitleEditor';
+import { LabelWrapper } from '../LabelWrapper';
 
 type Props = {
   data: HeraVizData | undefined;
-  vizType: VizType | undefined;
   vizSpec: VizSpec;
   className?: string;
-  onTitleChange: (newTitle: string) => void;
+  onVizSpecChange: (newVizSpec: VizSpec) => void;
 };
-
-function getSeries(vizData: HeraVizData | undefined): string[] {
-  if (vizData && vizData.length > 0) {
-    const firstObj = vizData[0];
-    const series = R.pipe(firstObj, R.omit(['date']), R.keys);
-    return series;
-  }
-
-  return [];
-}
 
 export function Visualization({
   data,
-  vizType,
   vizSpec,
   className,
-  onTitleChange,
+  onVizSpecChange,
 }: Props): JSX.Element {
-  const allSeries = React.useMemo(() => getSeries(data), [data]);
+  // get the first data object which we assume is enough to determine
+  // what fields are used in this data frame
+  const firstDataObj = React.useMemo(() => {
+    if (data && data.length > 0) {
+      return data[0];
+    }
+    return undefined;
+  }, [data]);
+
+  const allFields = React.useMemo(() => {
+    return firstDataObj ? R.keys(firstDataObj) : [];
+  }, [firstDataObj]);
+
+  const allSeries = React.useMemo(
+    () => allFields.filter((field) => field !== 'date'),
+    [allFields],
+  );
+
+  const onTitleChange = (newTitle: string) => {
+    onVizSpecChange({
+      ...vizSpec,
+      title: newTitle,
+    });
+  };
+
+  const onXAxisChange = (newXAxisField: string) => {
+    onVizSpecChange({
+      ...vizSpec,
+      xAxisField: newXAxisField,
+    });
+  };
+
+  const onSeriesFieldsChange = (newSeriesFields: readonly string[]) => {
+    onVizSpecChange({
+      ...vizSpec,
+      seriesFields: newSeriesFields,
+    });
+  };
 
   const renderVisualization = () => {
-    if (data && vizType) {
-      switch (vizType) {
+    if (data && vizSpec.vizType) {
+      switch (vizSpec.vizType) {
         case 'BAR_CHART':
+          if (vizSpec.xAxisField === undefined) {
+            return (
+              <p className="my-2 text-center">
+                Please select a field for the X Axis
+              </p>
+            );
+          }
+
+          if (
+            vizSpec.seriesFields === undefined ||
+            vizSpec.seriesFields.length === 0
+          ) {
+            return (
+              <p className="my-2 text-center">
+                Please select the series to visualize.
+              </p>
+            );
+          }
+
           return (
             <BarChart
-              index="check_up_no"
-              categories={['no_response']}
+              index={vizSpec.xAxisField ?? ''}
+              categories={vizSpec.seriesFields as string[]}
               className="h-72 w-full"
               data={data}
               yAxisWidth={30}
@@ -46,58 +99,95 @@ export function Visualization({
           );
 
         case 'LINE_CHART': {
-          const firstObj = data[0];
+          if (vizSpec.xAxisField === undefined) {
+            return (
+              <p className="my-2 text-center">Please select a date field.</p>
+            );
+          }
 
-          // take all keys from the object to be categories. But exclude
-          // `date` since that's the x-axis
-          const categories = firstObj
-            ? R.pipe(firstObj, R.omit(['date']), R.keys)
-            : [];
+          if (
+            vizSpec.seriesFields === undefined ||
+            vizSpec.seriesFields.length === 0
+          ) {
+            return (
+              <p className="my-2 text-center">
+                Please select the series to visualize.
+              </p>
+            );
+          }
+
           return (
             <LineChart
               className="h-72 w-full"
               data={data}
-              categories={categories}
-              index="date"
+              categories={vizSpec.seriesFields as string[]}
+              index={vizSpec.xAxisField ?? ''}
               yAxisWidth={30}
             />
           );
         }
         default:
-          throw new Error(`Unsupported vizType: '${vizType}'`);
+          throw new Error(`Unsupported vizType: '${vizSpec.vizType}'`);
       }
+    }
+
+    if (data && !vizSpec.vizType) {
+      return (
+        <p className="pt-4 text-center">Please select a visualization type.</p>
+      );
     }
     return <p className="pt-4 text-center">There is no data to show.</p>;
   };
 
   const renderVisualizationControls = () => {
-    if (data && vizType) {
+    if (data && vizSpec.vizType) {
       return (
-        <Select
-          onValueChange={() => {
-            return [];
-          }}
-          value={vizType}
-          placeholder="Choose series"
-        >
-          {allSeries.map((seriesKey) => {
-            return (
-              <SelectItem key={seriesKey} value={seriesKey}>
-                {seriesKey}
-              </SelectItem>
-            );
-          })}
-        </Select>
+        <div className="flex flex-col space-y-2">
+          <LabelWrapper label="X Axis">
+            <Select
+              onValueChange={onXAxisChange}
+              value={vizSpec.xAxisField}
+              placeholder="Choose X Axis..."
+            >
+              {allFields.map((fieldKey) => {
+                return (
+                  <SelectItem key={fieldKey} value={fieldKey}>
+                    {fieldKey}
+                  </SelectItem>
+                );
+              })}
+            </Select>
+          </LabelWrapper>
+
+          <LabelWrapper label="Series">
+            <MultiSelect
+              onValueChange={onSeriesFieldsChange}
+              value={vizSpec.seriesFields as string[] | undefined}
+              placeholder="Choose series..."
+            >
+              {allSeries.map((seriesKey) => {
+                return (
+                  <MultiSelectItem key={seriesKey} value={seriesKey}>
+                    {seriesKey}
+                  </MultiSelectItem>
+                );
+              })}
+            </MultiSelect>
+          </LabelWrapper>
+        </div>
       );
     }
     return null;
   };
 
-  // TODO: make the series selector into a multiselect
   return (
     <div className={className}>
       <div className="flex justify-center">
-        <TitleEditor onSaveTitle={onTitleChange} title={vizSpec.title} />
+        <TitleEditor
+          titleSize="h2"
+          onSaveTitle={onTitleChange}
+          title={vizSpec.title}
+        />
       </div>
       {renderVisualization()}
       {renderVisualizationControls()}

@@ -17,7 +17,7 @@ type NotAssignableToJSON = bigint | symbol | ((...args: unknown[]) => unknown);
 /**
  * Recursively go through a type and make it JSON-compatible
  */
-export type ToJSON<T> = unknown extends T
+export type JSONCompatible<T> = unknown extends T
   ? never
   : {
       [P in keyof T]: Date extends T[P]
@@ -26,7 +26,7 @@ export type ToJSON<T> = unknown extends T
         ? T[P]
         : T[P] extends NotAssignableToJSON
         ? never
-        : ToJSON<T[P]>;
+        : JSONCompatible<T[P]>;
     };
 
 /**
@@ -38,7 +38,7 @@ export function toJSON<T>(
   options = {
     dateFormatter: formatDate,
   },
-): ToJSON<T> {
+): JSONCompatible<T> {
   // handle JSON primitives
   if (
     val === undefined ||

@@ -30,7 +30,7 @@ export function LoginView(): JSX.Element {
 
         if (loginResponse.ok) {
           console.log('Login successful');
-          navigate('/viz-builder');
+          navigate('/dashboard-builder');
         } else {
           // TODO: handle failure
           console.error('Login failed', await loginResponse.text());

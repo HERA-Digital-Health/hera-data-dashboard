@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { LoginView } from './components/LoginView/index';
 import { DashboardBuilderView } from './components/DashboardBuilderView';
+import { DashboardViewer } from './components/DashboardViewer';
 
 const QUERY_CLIENT = new QueryClient();
 
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: '/dashboard-builder',
         element: <DashboardBuilderView />,
+      },
+      {
+        path: '/dashboard/:slug',
+        element: <DashboardViewer />,
       },
     ],
   },

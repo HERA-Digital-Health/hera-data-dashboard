@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as R from 'remeda';
 import {
   Card,
   SelectItem,
@@ -14,49 +14,50 @@ import { type VizType } from '../../../models/common';
 import { Indicators } from '../../../config/Indicators';
 import { LabelWrapper } from '../../ui/LabelWrapper';
 import { SupportedVisualizations } from '../../../config/Visualizations';
-import { HeraVizData } from '../../../models/common';
 import { VizSpec } from '../../../models/VizSpec';
 import { Visualization } from '../../ui/Visualization';
-
-/**
- * Given the data, guess the best viz type for it.
- * If there is already a selected viz type then just use that one.
- */
-function guessVizType(
-  vizData: HeraVizData | undefined,
-  selectedVizType: VizType | undefined,
-): VizType | undefined {
-  if (selectedVizType) {
-    return selectedVizType;
-  }
-
-  if (vizData && vizData.length > 0) {
-    const firstObj = vizData[0];
-    return 'date' in firstObj ? 'LINE_CHART' : 'BAR_CHART';
-  }
-
-  return undefined;
-}
 
 type Props = {
   vizSpec: VizSpec;
   onRemoveVisualization: (vizSpec: VizSpec) => void;
-  onVizSpecUpdate: (newVizSpec: VizSpec) => void;
+  onVizSpecChange: (newVizSpec: VizSpec) => void;
 };
 
 export function VizBuilder({
   vizSpec,
   onRemoveVisualization,
-  onVizSpecUpdate,
+  onVizSpecChange,
 }: Props): JSX.Element {
-  const [selectedVizType, setSelectedVizType] = React.useState<
-    VizType | undefined
-  >();
+  // fetch the data
+  const { data, isFetching } = useHeraQuery(vizSpec.querySpec);
 
-  const onTitleChange = (newTitle: string) => {
-    onVizSpecUpdate({
+  const onVizTypeChange = (newVizType: VizType) => {
+    onVizSpecChange({
       ...vizSpec,
-      title: newTitle,
+      vizType: newVizType,
+
+      // if there is loaded data and there is a 'date' field, then
+      // proactively set it as the xAxis if we've chosen to plot
+      // a line graph
+      xAxisField:
+        newVizType === 'LINE_CHART' &&
+        data &&
+        data.length > 0 &&
+        data[0] &&
+        'date' in data[0]
+          ? 'date'
+          : vizSpec.xAxisField,
+
+      // if there is loaded data and we haven't already chosen the series
+      // fields to visualize, then select all of them
+      seriesFields:
+        newVizType === 'LINE_CHART' &&
+        data &&
+        data.length > 0 &&
+        data[0] &&
+        vizSpec.seriesFields === undefined
+          ? R.keys(data[0]).filter((key) => key !== 'date')
+          : vizSpec.seriesFields,
     });
   };
 
@@ -65,31 +66,32 @@ export function VizBuilder({
       return indObj.name === indicatorName;
     });
 
-    onVizSpecUpdate({
+    onVizSpecChange({
       ...vizSpec,
-      indicator: selectedIndicator,
+      querySpec: {
+        ...vizSpec.querySpec,
+        indicator: selectedIndicator,
+      },
+
+      // if the indicator has changed, then we clear our x axis
+      // and series fields, because these may change entirely
+      xAxisField: undefined,
+      seriesFields: undefined,
     });
   };
 
   const onDateRangeChange = (newDateRange: DateRangePickerValue) => {
-    onVizSpecUpdate({
+    onVizSpecChange({
       ...vizSpec,
-      dateRange: newDateRange,
+      querySpec: {
+        ...vizSpec.querySpec,
+        dateRange: newDateRange,
+      },
     });
   };
 
-  // fetch the data
-  const { data, isFetching } = useHeraQuery({
-    indicator: vizSpec.indicator,
-    dateRange: vizSpec.dateRange,
-  });
-
-  const vizType = React.useMemo(() => {
-    return guessVizType(data, selectedVizType);
-  }, [selectedVizType, data]);
-
   return (
-    <Card className="relative w-fit">
+    <Card className="relative">
       <div className="absolute right-0 top-0">
         <Button
           variant="light"
@@ -101,11 +103,11 @@ export function VizBuilder({
         </Button>
       </div>
       <form className="space-y-4">
-        <div className="flex space-x-4">
+        <div className="flex flex-col">
           <LabelWrapper label="Indicator">
             <Select
               onValueChange={onIndicatorChange}
-              value={vizSpec.indicator?.name}
+              value={vizSpec.querySpec.indicator?.name}
             >
               {Indicators.map(({ name }) => {
                 return (
@@ -120,16 +122,14 @@ export function VizBuilder({
           <LabelWrapper label="Date Range">
             <DateRangePicker
               onValueChange={onDateRangeChange}
-              value={vizSpec.dateRange}
+              value={vizSpec.querySpec.dateRange}
             />
           </LabelWrapper>
 
           <LabelWrapper label="Visualization Type">
             <Select
-              onValueChange={(val: string) => {
-                return setSelectedVizType(val as VizType);
-              }}
-              value={vizType}
+              onValueChange={(val: string) => onVizTypeChange(val as VizType)}
+              value={vizSpec.vizType}
             >
               {SupportedVisualizations.map(({ type, displayName }) => {
                 return (
@@ -145,10 +145,9 @@ export function VizBuilder({
       {isFetching ? <p>Fetching...</p> : null}
       <Visualization
         className="pt-4"
-        vizType={vizType}
         vizSpec={vizSpec}
         data={data}
-        onTitleChange={onTitleChange}
+        onVizSpecChange={onVizSpecChange}
       />
     </Card>
   );

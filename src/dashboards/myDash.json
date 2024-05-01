@@ -1,1 +1,1 @@
-{"title":"Untitled Dashboard","slug":"untitled-dashboard","visualizations":[{"title":"Untitled Chart","id":"d53cedcb-a2c3-4c43-a4fc-2ffd315cdca4"}]}
+{"title":"Untitled Dashboard","slug":"untitled-dashboard","visualizations":[{"title":"Yoooo","id":"617f3238-e8db-479f-b60e-2d8d0c550ac4","querySpec":{"indicator":{"name":"User Signups","endpoint":"users"},"dateRange":{"from":"2024-01-01","to":"2024-04-30","selectValue":"y"}},"vizType":"LINE_CHART"}]}
