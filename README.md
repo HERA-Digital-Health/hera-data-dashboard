@@ -23,6 +23,10 @@ Now ssh into the EC2 instance as a root user
 
 The dashboard should be running and accessible at the EC2 instance URL!
 
+Once the app is running in production, starting/stopping can be handled easily using `pm2`. Just use `pm2 stop vite-app` or `pm2 restart vite-app` as necessary.
+
+To view logs, use `pm2 logs`
+
 ## How do I add a new dashboard?
 
 1. Go to the Dashboard Builder
