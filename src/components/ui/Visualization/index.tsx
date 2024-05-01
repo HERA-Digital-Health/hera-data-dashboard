@@ -28,21 +28,35 @@ type Props = {
 
 const VISUALIZATION_HEIGHT = 400;
 
-function bucketByDateGranularity(
+function bucketByField(
   data: HeraVizData,
-  granularity: 'day' | 'week' | 'month' | 'year',
+  bucketOptions?:
+    | {
+        dateGranularity: 'day' | 'week' | 'month' | 'year';
+      }
+    | {
+        fieldKey: string;
+      },
 ) {
   if (data.length === 0) {
     return [];
   }
 
-  // bucket into arrays per date granularity
+  if (!bucketOptions) {
+    return data;
+  }
+
+  // bucket into arrays per date dateGranularity
   // (e.g. an array of data objects per month)
-  const bucketedObjectsByDate = R.groupBy(data, (dataObj) => {
-    if ('date' in dataObj && dataObj.date) {
+  const bucketedObjects = R.groupBy(data, (dataObj) => {
+    if (
+      'date' in dataObj &&
+      dataObj.date &&
+      'dateGranularity' in bucketOptions
+    ) {
       const date = dataObj.date;
 
-      switch (granularity) {
+      switch (bucketOptions.dateGranularity) {
         case 'day':
           return stringToDateTime(date).toFormat('yyyy-MM-dd');
         case 'week':
@@ -53,48 +67,58 @@ function bucketByDateGranularity(
           return stringToDateTime(date).startOf('year').toFormat('yyyy');
       }
     }
+
+    if ('fieldKey' in bucketOptions && bucketOptions.fieldKey in dataObj) {
+      return dataObj[bucketOptions.fieldKey];
+    }
+
     return undefined;
   });
 
+  const keyToBucketBy =
+    'dateGranularity' in bucketOptions ? 'date' : bucketOptions.fieldKey;
+
   // now sum up the arrays
-  const aggregatedBuckets = R.mapValues(
-    bucketedObjectsByDate,
-    (dataObjects) => {
-      if (dataObjects.length === 0) {
-        return [];
-      }
+  const aggregatedBuckets = R.mapValues(bucketedObjects, (dataObjects) => {
+    if (dataObjects.length === 0) {
+      return [];
+    }
 
-      // exclude 'date' from the keys
-      const keys = Object.keys(dataObjects[0]).filter((key) => key !== 'date');
-      const aggregatedDataObj = R.mapToObj(keys, (key) => [
-        key,
-        undefined as undefined | number,
-      ]);
+    // exclude the bucket key from the keys, so we can add it back later
+    const keys = Object.keys(dataObjects[0]).filter(
+      (key) => key !== keyToBucketBy,
+    );
+    const aggregatedDataObj = R.mapToObj(keys, (key) => [
+      key,
+      undefined as undefined | number,
+    ]);
 
-      dataObjects.forEach((dataObj) => {
-        keys.forEach((key) => {
-          if (typeof dataObj[key] === 'number') {
-            const newVal = dataObj[key] as number;
-            const currVal = aggregatedDataObj[key];
-            if (currVal === undefined) {
-              aggregatedDataObj[key] = newVal;
-            } else {
-              aggregatedDataObj[key] = newVal + currVal;
-            }
+    dataObjects.forEach((dataObj) => {
+      keys.forEach((key) => {
+        if (typeof dataObj[key] === 'number') {
+          const newVal = dataObj[key] as number;
+          const currVal = aggregatedDataObj[key];
+          if (currVal === undefined) {
+            aggregatedDataObj[key] = newVal;
+          } else {
+            aggregatedDataObj[key] = newVal + currVal;
           }
-        });
+        }
       });
+    });
 
-      return aggregatedDataObj;
-    },
-  );
+    return aggregatedDataObj;
+  });
 
   // and now convert it back to a HeraVizData array
   return R.pipe(
     aggregatedBuckets,
     R.entries,
-    R.map(([date, dataObj]) => {
-      return { ...dataObj, date };
+    R.map(([bucketedVal, dataObj]) => {
+      return {
+        ...dataObj,
+        [keyToBucketBy]: bucketedVal,
+      };
     }),
     R.sortBy((obj) => obj.date),
   );
@@ -151,10 +175,18 @@ export function Visualization({
 
   const processedData: HeraVizData | undefined = React.useMemo(() => {
     if (data && vizSpec.dateGroupBy) {
-      return bucketByDateGranularity(data, vizSpec.dateGroupBy);
+      return bucketByField(data, {
+        dateGranularity: vizSpec.dateGroupBy,
+      });
+    }
+
+    if (data && vizSpec.vizType === 'BAR_CHART' && vizSpec.xAxisField) {
+      return bucketByField(data, {
+        fieldKey: vizSpec.xAxisField,
+      });
     }
     return data;
-  }, [data, vizSpec.dateGroupBy]);
+  }, [data, vizSpec.dateGroupBy, vizSpec.vizType, vizSpec.xAxisField]);
 
   const renderVisualization = () => {
     if (processedData && vizSpec.vizType) {
@@ -178,6 +210,9 @@ export function Visualization({
               </p>
             );
           }
+
+          console.log('og data', data);
+          console.log('processed data', processedData);
 
           return (
             <BarChart
